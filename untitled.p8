@@ -22,7 +22,7 @@ end
 function init_player()
     player =
     {
-        x = 54,
+        x = 128,
         y= 104,
         spr = 1,
         flip = false,
@@ -34,8 +34,9 @@ function init_player()
         anim_max = 4,
         anim_tick = 0,
         friction = 0.05,
-        suck_power = 1,
-        cam_x = 0
+        suck_power = 3,
+        cam_x = 0,
+        score = 0
 
     }
 end
@@ -159,6 +160,13 @@ function update_ufos()
                 ufo.y += player.suck_power
             end
         end
+
+        if(ufo.y >= player.y) then
+            del(ufos, ufo)
+            player.score += 1
+        end
+
+
     end
 end
 
@@ -183,6 +191,9 @@ function draw_game()
         line(ray.x, ray.top_y, ray.x, ray.bottom_y, 8)
     end
     draw_ufos()
+
+    camera(0,0)
+    print("score: " .. player.score, 8, 8, 7)
 end
 
 -- INTRO MANAGEMENT
