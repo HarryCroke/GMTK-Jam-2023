@@ -12,10 +12,20 @@ function init_game()
     init_player()
     rays = {}
     ufos = {}
+    night =
+    {
+        count = 1,
+        hour = 0,
+        tick = 0,
+        hour_length = 300,
+        ufo_count = 2,
+        ufo_perhour = 1,
+        ufo_prev_dir = 1
+    }
 
-    --spawn_ufo(0, 16, -1, 4, 16)
-    spawn_ufo(128, 16, -1, -4, 16)
-    spawn_ufo(0, 16, 1, 4, 16)
+    
+    --spawn_ufo(128, 16, -1, -4, 16)
+    --spawn_ufo(0, 16, 1, 4, 16)
 end
 
 -- PLAYER SETUP
@@ -34,7 +44,7 @@ function init_player()
         anim_max = 4,
         anim_tick = 0,
         friction = 0.05,
-        suck_power = 3,
+        suck_power = 1,
         cam_x = 0,
         score = 0
 
@@ -166,6 +176,12 @@ function update_ufos()
             player.score += 1
         end
 
+        if (ufo.x < -8) then
+            ufo.x = 256
+        elseif (ufo.x > 256) then
+            ufo.x = -8
+        end
+
 
     end
 end
@@ -176,10 +192,47 @@ function draw_ufos()
     end
 end
 
+function ufo_wave()
+    i = night.ufo_perhour
+    while (i>0) do 
+        if(night.ufo_count > 0) then
+            if(night.ufo_prev_dir == 1)then
+                spawn_ufo(128, 16, -1, -4, 16)
+                night.ufo_prev_dir = -1
+            else 
+                spawn_ufo(0, 16, 1, 4, 16)
+                night.ufo_prev_dir = 1
+            end
+            
+            night.ufo_count -=1
+        end
+        i-=1
+    end
+end
+
+-- NIGHT
+function update_night()
+    night.tick+=1
+    if(night.tick>night.hour_length) then
+        night.hour+=1
+        night.tick=0
+        ufo_wave()
+
+    end
+    if(night.hour > 6) then
+        night.count +=1
+        night.hour = 0
+    end
+    
+
+end
+
+
 -- GAME UPDATE AND DRAW
 function update_game()
     update_player()
     update_ufos()
+    update_night()
 
 end
 
@@ -193,7 +246,9 @@ function draw_game()
     draw_ufos()
 
     camera(0,0)
-    print("score: " .. player.score, 8, 8, 7)
+    print("night: " .. night.count , 8, 8, 7)
+    print("time: 0" .. night.hour .. ":00", 8, 16, 7)
+    print("score: " .. player.score, 8, 24, 7)
 end
 
 -- INTRO MANAGEMENT
