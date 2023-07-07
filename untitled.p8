@@ -11,6 +11,11 @@ function init_game()
     scene = "game"
     init_player()
     rays = {}
+    ufos = {}
+
+    --spawn_ufo(0, 16, -1, 4, 16)
+    spawn_ufo(128, 16, -1, -4, 16)
+    spawn_ufo(0, 16, 1, 4, 16)
 end
 
 -- PLAYER SETUP
@@ -29,6 +34,7 @@ function init_player()
         anim_max = 4,
         anim_tick = 0,
         friction = 0.05,
+        suck_power = 1,
         cam_x = 0
 
     }
@@ -130,11 +136,43 @@ function shootRay(ray_x, ray_type)
     add(rays, ray)
 end
 
+-- UFOS
+function spawn_ufo(ufo_x, ufo_y, ufo_dir, ufo_dx, ufo_spr)
+    ufo = {
+        x = ufo_x,
+        y = ufo_y,
+        dir = ufo_dir,
+        dx = ufo_dx,
+        max_dx = ufo_dx,
+        spr = ufo_spr
+    }
+    add(ufos, ufo)
+end
 
+function update_ufos()
+    for ufo in all(ufos) do 
+        ufo.x+=ufo.dx
+        for ray in all(rays) do
+            if(ray.x < (ufo.x+8)) and (ray.x > ufo.x) then
+                ufo.dx = 0.1 * ufo.dir
+                ufo.y += player.suck_power
+            else 
+                ufo.dx = ufo.max_dx
+            end
+        end
+    end
+end
+
+function draw_ufos()
+    for ufo in all(ufos) do
+        spr(ufo.spr, ufo.x, ufo.y)
+    end
+end
 
 -- GAME UPDATE AND DRAW
 function update_game()
     update_player()
+    update_ufos()
 
 end
 
@@ -145,6 +183,7 @@ function draw_game()
     for ray in all(rays) do 
         line(ray.x, ray.top_y, ray.x, ray.bottom_y, 8)
     end
+    draw_ufos()
 end
 
 -- INTRO MANAGEMENT
@@ -159,47 +198,47 @@ end
 
 --draw and update intro
 function update_intro()
-intro_tick+=1
-if logo_count<15 then
-    if intro_tick==5 then
-    logo={
-    speed=7,
-    y=128,
-    colour=logo_tint
-    }
-    add(logos,logo)
-    intro_tick=0
-    logo_count+=1
-    if logo_count%2==0 then
-    logo_tint=2
+    intro_tick+=1
+    if logo_count<15 then
+        if intro_tick==5 then
+        logo={
+        speed=7,
+        y=128,
+        colour=logo_tint
+        }
+        add(logos,logo)
+        intro_tick=0
+        logo_count+=1
+        if logo_count%2==0 then
+        logo_tint=2
+        else
+        logo_tint=14
+        end
+        end
     else
-    logo_tint=14
+        if intro_tick==30 then
+        logo_colour=7
+        sfx(-1)
+        sfx(41)
+        elseif intro_tick==75 then
+        --init_menu()
+        end
     end
+    for logo in all(logos) do
+        logo.y-=logo.speed
+        logo.speed/=1.1
+        if logo.y<=56 then
+        del(logos,logo)
+        end
     end
-else
-    if intro_tick==30 then
-    logo_colour=7
-    sfx(-1)
-    sfx(41)
-    elseif intro_tick==75 then
-    --init_menu()
-    end
-end
-for logo in all(logos) do
-    logo.y-=logo.speed
-    logo.speed/=1.1
-    if logo.y<=56 then
-    del(logos,logo)
-    end
-end
 end
 
 function draw_intro()
-cls()
-for logo in all(logos) do
-    print('\130 harfrog \130',39,logo.y,logo.colour)
-end
-print('\130 harfrog \130',39,56,logo_colour)
+    cls()
+    for logo in all(logos) do
+        print('\130 harfrog \130',39,logo.y,logo.colour)
+    end
+    print('\130 harfrog \130',39,56,logo_colour)
 end
 
 function _update()
@@ -231,11 +270,11 @@ __gfx__
 00000000006060060606006000606006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00b33300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+6666dddd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0dddddd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00dddd00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 b3b3b3b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 33333333004000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
