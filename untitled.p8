@@ -152,12 +152,11 @@ end
 function update_ufos()
     for ufo in all(ufos) do 
         ufo.x+=ufo.dx
+        ufo.dx = ufo.max_dx
         for ray in all(rays) do
             if(ray.x < (ufo.x+8)) and (ray.x > ufo.x) then
                 ufo.dx = 0.1 * ufo.dir
                 ufo.y += player.suck_power
-            else 
-                ufo.dx = ufo.max_dx
             end
         end
     end
