@@ -2,9 +2,99 @@ pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
 function _init()
-    init_intro()
+    --init_intro()
+    init_game()
+    
 end
 
+function init_game()
+    scene = "game"
+    init_player()
+end
+
+-- PLAYER SETUP
+function init_player()
+    player =
+    {
+        x = 0,
+        y= 104,
+        spr = 1,
+        flip = false,
+        max_dx = 1,
+        dx = 0,
+        acc_x = 0.25,
+        moving = false,
+        anim_max = 4,
+        anim_tick = 0,
+        friction = 0.1
+
+    }
+end
+
+-- UPDATE PLAYER
+function update_player()
+    -- player movement input
+    if (btn(1)) then
+        player.dx+=player.acc_x
+        moving = true
+    elseif (btn(0)) then
+        player.dx-=player.acc_x
+        moving = true
+    else
+        moving = false
+        player.anim_tick = player.anim_max
+    end
+    -- player flip and friction
+    if(player.dx > player.friction) then
+        player.flip = true
+        player.dx-=player.friction
+    elseif(player.dx < -player.friction) then
+        player.flip = false
+        player.dx+=player.friction
+    else 
+        player.spr=1
+    end
+    -- clamp player speed
+    if(player.dx > player.max_dx) then
+        player.dx = player.max_dx
+    elseif(player.dx < -player.max_dx) then
+        player.dx = -player.max_dx
+    end
+
+
+
+    player.x += player.dx
+
+    animate_player()
+end
+
+function animate_player()
+    if(moving) then
+        player.anim_tick +=1
+        if(player.anim_tick>player.anim_max) then
+            if(player.spr == 1) then
+                player.spr = 2
+            else 
+                player.spr = 1
+            end
+            player.anim_tick = 0
+
+        end
+    end
+end
+
+-- GAME UPDATE AND DRAW
+function update_game()
+    update_player()
+
+end
+
+function draw_game()
+    cls()
+    spr(player.spr, player.x, player.y, 1, 1, player.flip)
+end
+
+-- INTRO MANAGEMENT
 function init_intro()
     logos = {}
     logo_count=0
@@ -60,11 +150,21 @@ print('\130 harfrog \130',39,56,logo_colour)
 end
 
 function _update()
-    update_intro()
+    if (scene=="intro")then
+        update_intro()
+    elseif (scene == "game") then
+        update_game()
+    end
+    
 end
 
 function _draw()
-    draw_intro()
+    if(scene=="intro")  then
+        draw_intro()
+    elseif (scene=="game") then
+        draw_game()
+    end
+    
 end
 __gfx__
 00000000000000000000000070007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
