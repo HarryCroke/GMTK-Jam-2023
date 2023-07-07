@@ -10,6 +10,7 @@ end
 function init_game()
     scene = "game"
     init_player()
+    rays = {}
 end
 
 -- PLAYER SETUP
@@ -68,6 +69,7 @@ function update_player()
         player.sucking = true
         player.moving = false
         player.dx = 0
+        shootRay(player.x+4, "suck")
     else
         player.sucking = false
     end
@@ -115,6 +117,21 @@ function animate_player()
     end
 end
 
+-- SUCKING
+
+function shootRay(ray_x, ray_type)
+    ray =
+    {
+        x = ray_x,
+        top_y = 0,
+        bottom_y = 128,
+        type = ray_type 
+    }
+    add(rays, ray)
+end
+
+
+
 -- GAME UPDATE AND DRAW
 function update_game()
     update_player()
@@ -125,6 +142,9 @@ function draw_game()
     cls()
     spr(player.spr, player.x, player.y, 1, 1, player.flip)
     map(0,0)
+    for ray in all(rays) do 
+        line(ray.x, ray.top_y, ray.x, ray.bottom_y, 8)
+    end
 end
 
 -- INTRO MANAGEMENT
@@ -186,6 +206,7 @@ function _update()
     if (scene=="intro")then
         update_intro()
     elseif (scene == "game") then
+        rays = {} -- clear rays each frame
         update_game()
     end
     
