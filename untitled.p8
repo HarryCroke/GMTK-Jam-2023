@@ -24,9 +24,10 @@ function init_player()
         dx = 0,
         acc_x = 0.25,
         moving = false,
+        sucking = false,
         anim_max = 4,
         anim_tick = 0,
-        friction = 0.1,
+        friction = 0.05,
         cam_x = 0
 
     }
@@ -37,14 +38,14 @@ function update_player()
     -- player movement input
     if (btn(1)) then
         player.dx+=player.acc_x
-        moving = true
+        player.moving = true
     elseif (btn(0)) then
         player.dx-=player.acc_x
-        moving = true
+        player.moving = true
     else
-        moving = false
-        player.anim_tick = player.anim_max
+        player.moving = false
     end
+
     -- player flip and friction
     if(player.dx > player.friction) then
         player.flip = true
@@ -53,13 +54,22 @@ function update_player()
         player.flip = false
         player.dx+=player.friction
     else 
-        player.spr=1
+        player.moving=false
+        player.dx = 0
     end
     -- clamp player speed
     if(player.dx > player.max_dx) then
         player.dx = player.max_dx
     elseif(player.dx < -player.max_dx) then
         player.dx = -player.max_dx
+    end
+
+    if btn(5) then
+        player.sucking = true
+        player.moving = false
+        player.dx = 0
+    else
+        player.sucking = false
     end
 
     -- Camera
@@ -78,11 +88,12 @@ function update_player()
     elseif(player.x>256) then
         player.x = -8
     end
+
     animate_player()
 end
 
 function animate_player()
-    if(moving) then
+    if(player.moving) then
         player.anim_tick +=1
         if(player.anim_tick>player.anim_max) then
             if(player.spr == 1) then
@@ -93,6 +104,14 @@ function animate_player()
             player.anim_tick = 0
 
         end
+    elseif(player.dx != 0) then
+        player.spr=2
+    else 
+        player.spr = 1
+    end
+
+    if(player.sucking) then
+        player.spr = 3
     end
 end
 
