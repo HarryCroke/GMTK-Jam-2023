@@ -43,7 +43,11 @@ function init_player()
         flip = false,
         max_dx = 1,
         dx = 0,
+        walk_dx = 0,
+        extra_dx = 0,
         acc_x = 0.25,
+        deacc_x = 0.5,
+        boost_dx = 7,
         moving = false,
         sucking = false,
         anim_max = 4,
@@ -63,48 +67,63 @@ end
 function update_player()
     -- player movement input
     if (btn(1)) then
-        player.dx+=player.acc_x
+        player.walk_dx+=player.acc_x
         player.moving = true
     elseif (btn(0)) then
-        player.dx-=player.acc_x
+        player.walk_dx-=player.acc_x
         player.moving = true
     else
         player.moving = false
     end
 
     -- player flip and friction
-    if(player.dx > player.friction) then
+    if(player.walk_dx > player.friction) then
         player.flip = true
-        player.dx-=player.friction
-    elseif(player.dx < -player.friction) then
+        player.walk_dx-=player.friction
+    elseif(player.walk_dx < -player.friction) then
         player.flip = false
-        player.dx+=player.friction
+        player.walk_dx+=player.friction
     else 
         player.moving=false
-        player.dx = 0
+        player.walk_dx = 0
     end
     -- clamp player speed
-    if(player.dx > player.max_dx) then
-        player.dx = player.max_dx
-    elseif(player.dx < -player.max_dx) then
-        player.dx = -player.max_dx
+    if(player.walk_dx > player.max_dx) then
+        player.walk_dx = player.max_dx
+    elseif(player.walk_dx < -player.max_dx) then
+        player.walk_dx = -player.max_dx
     end
 
-    if btn(5) and (player.gas > 0) and not (player.can_eat) then
+    if btn(4) and (player.gas > 0) and not (player.can_eat) then
         player.sucking = true
         player.moving = false
-        player.dx = 0
-        shootRay(player.x+4, "suck")
+        player.walk_dx = 0
+        if(player.flip) then
+            shootRay(player.x+6, "suck")
+        else
+            shootRay(player.x+1, "suck")
+        end
+        
         player.gas -= 1
     elseif btn(4) and (player.can_eat) and (player.gas<100) then
         player.moving = false
         player.eating= true
         player.sucking = false
         player.gas+=1
-        player.dx = 0
+        player.walk_dx = 0
     else
         player.sucking = false
         player.eating = false
+    end
+
+    -- boost
+    if btnp(5) and (player.gas>=20) then
+        if(player.flip) then
+            player.extra_dx+=player.boost_dx
+        else
+            player.extra_dx-=player.boost_dx
+        end
+        player.gas -= 25
     end
 
     -- Camera
@@ -115,6 +134,19 @@ function update_player()
         player.cam_x = map_end-128
     end
     camera(player.cam_x)
+
+    if (player.extra_dx <= player.deacc_x) and (player.extra_dx > 0)
+    or (player.extra_dx >= -player.deacc_x) and (player.extra_dx < 0)then
+        player.extra_dx = 0
+    elseif (player.extra_dx > 0) then
+        player.extra_dx -= player.deacc_x
+    elseif (player.extra_dx < 0)then
+        player.extra_dx += player.deacc_x
+    
+    end
+
+    -- player speed/pos cals
+    player.dx = player.walk_dx + player.extra_dx
     player.x += player.dx
 
     -- Clamp player pos
