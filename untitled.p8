@@ -26,7 +26,8 @@ function init_game()
     }
 
     new_night()
-
+    map_start = 0
+    map_end = 512
     
     --spawn_ufo(128, 16, -1, -4, 16)
     --spawn_ufo(0, 16, 1, 4, 16)
@@ -96,25 +97,30 @@ function update_player()
         shootRay(player.x+4, "suck")
         player.gas -= 1
     elseif btn(4) and (player.can_eat) and (player.gas<100) then
+        player.moving = false
+        player.eating= true
+        player.sucking = false
         player.gas+=1
+        player.dx = 0
     else
         player.sucking = false
+        player.eating = false
     end
 
     -- Camera
     player.cam_x = player.x-56,0
     if(player.cam_x <0) then 
         player.cam_x = 0
-    elseif (player.cam_x > 248-120) then
-        player.cam_x = 248-120
+    elseif (player.cam_x > map_end-128) then
+        player.cam_x = map_end-128
     end
     camera(player.cam_x)
     player.x += player.dx
 
     -- Clamp player pos
     if(player.x<-8) then
-        player.x = 256
-    elseif(player.x>256) then
+        player.x = map_end
+    elseif(player.x>map_end) then
         player.x = -8
     end
 
@@ -142,6 +148,8 @@ function animate_player()
 
     if(player.sucking) then
         player.spr = 3
+    elseif (player.eating) then
+        player.spr = 4
     end
 end
 
@@ -182,13 +190,20 @@ end
 
 function update_ufos()
     for ufo in all(ufos) do 
-        ufo.x+=ufo.dx
+        
         ufo.dx = ufo.max_dx
+
         for ray in all(rays) do
             if(ray.x < (ufo.x+8)) and (ray.x > ufo.x) then
                 ufo.dx = 0.1 * ufo.dir
                 ufo.y += player.suck_power
             end
+        end
+
+        if(ufo.x > player.cam_x-8) and (ufo.x + 8 > player.cam_x+128) or (ufo.x<0) or (ufo.x > map_end) then
+            ufo.x+=ufo.dx/4
+        else 
+            ufo.x+=ufo.dx
         end
 
         if(ufo.y >= player.y) then
@@ -197,8 +212,8 @@ function update_ufos()
         end
 
         if (ufo.x < -8) then
-            ufo.x = 256
-        elseif (ufo.x > 256) then
+            ufo.x = map_end
+        elseif (ufo.x > map_end) then
             ufo.x = -8
         end
 
@@ -217,10 +232,10 @@ function ufo_wave()
     while (i>0) do 
         if(night.ufo_count > 0) then
             if(night.ufo_prev_dir == 1)then
-                spawn_ufo(128, 16, -1, -4, 16)
+                spawn_ufo(128, 16, -1, -2, 16)
                 night.ufo_prev_dir = -1
             else 
-                spawn_ufo(0, 16, 1, 4, 16)
+                spawn_ufo(0, 16, 1, 2, 16)
                 night.ufo_prev_dir = 1
             end
             night.ufo_count -=1
@@ -405,5 +420,5 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0021000023000000000000232300000000000000232300000023230000002200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2020202020202020202020202020202020202020202020202020202020202020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0021000000000000002323000000000000000000002323230000000000002200002100000000002323232300000000000000000000002323230000000000220000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
