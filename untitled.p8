@@ -2,6 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
 function _init()
+    patches = {}
     --init_intro()
     --init_game()
     init_menu()
@@ -32,6 +33,7 @@ function init_game()
     map_end = 512
     new_night()
     strikes = 1
+    regrow_rate = 0.5
     
     --spawn_ufo(128, 16, -1, -4, 16)
     --spawn_ufo(0, 16, 1, 4, 16)
@@ -62,7 +64,8 @@ function init_player()
         score = 0,
         gas = 104,
         can_eat = false,
-        eating = false
+        eating = false,
+        touch_grass = false
 
     }
 end
@@ -98,8 +101,8 @@ function update_player()
         player.walk_dx = -player.max_dx
     end
 
-    if btn(2) and (player.gas > 0) and not (player.can_eat)
-    or btn(5) and (player.gas > 0) and not (player.can_eat) then
+    if btn(2) and (player.gas > 0) and not (player.touch_grass)
+    or btn(5) and (player.gas > 0) and not (player.touch_grass) then
         player.sucking = true
         player.moving = false
         player.walk_dx = 0
@@ -110,8 +113,8 @@ function update_player()
         end
         
         player.gas -= 1
-    elseif btn(3) and (player.can_eat) and (player.gas<104)
-    or btn(4) and (player.can_eat) and (player.gas<104) then
+    elseif btn(3) and (player.can_eat) and (player.gas<104) and (player.touch_grass)
+    or btn(4) and (player.can_eat) and (player.gas<104) and (player.touch_grass) then
         player.moving = false
         player.eating= true
         player.sucking = false
@@ -162,7 +165,7 @@ function update_player()
         player.x = -8
     end
 
-    check_grass_collision()
+    --check_grass_collision()
     animate_player()
 end
 
@@ -340,8 +343,105 @@ function new_night()
     end
     ufo_wave()
     init_player()
+    get_grass_patches()
 
 end
+
+-- GRASS
+function get_grass_patches()
+    -- doing this manually because it's quicker for me to write lol
+    patches = {
+        {
+            x = 9,
+            w = 2,
+            health = 104,
+            edible = true,
+            player_touch = false,
+            spr = 9
+        },
+        {
+            x = 21,
+            w = 3,
+            health = 104,
+            edible = true,
+            player_touch = false,
+            spr = 9
+        },
+        {
+            x = 39,
+            w = 4,
+            health = 104,
+            edible = true,
+            player_touch = false,
+            spr = 9
+        },
+        {
+            x = 54,
+            w = 3,
+            health = 104,
+            edible = true,
+            player_touch = false,
+            spr = 9
+        }
+    }
+end
+
+function update_grass_patches()
+    player.can_eat = false
+    player.touch_grass = false
+    for patch in all(patches) do 
+        -- collision with player
+        x_1 = patch.x*8
+        x_2 = (patch.x+patch.w+1)*8
+        if (player.x>x_1-4) and (player.x+8<x_2+4) then
+            player.touch_grass = true
+            patch.player_touch = true
+            if(patch.edible == true)then 
+                player.can_eat = true
+            end
+        else 
+            patch.player_touch = false
+        end
+
+        if(patch.player_touch) and (player.eating) then
+            patch.health-=1
+        elseif(patch.edible) and (patch.health<=104) and not (patch.player_touch) then 
+            patch.health+=regrow_rate
+        elseif (patch.health<=104) and not (patch.player_touch) then 
+            patch.health+= (regrow_rate/2)
+        end
+
+        if(patch.health<=0) then 
+            patch.edible = false
+        elseif(patch.health>=104) then 
+            patch.edible = true
+        end
+
+        if (patch.health>104) then 
+            patch.health=104
+        end
+
+        if(patch.health>=75) then
+            patch.spr = 9 
+        elseif(patch.health>=25) then
+            patch.spr = 10
+        else 
+            patch.spr = 11
+        end
+        if not(patch.edible) then 
+        patch.spr += 3
+        end
+
+        i = 0
+        while (i<patch.w) do 
+            mset(patch.x + i, 13, patch.spr)
+            i +=1
+        end
+
+    end
+end
+
+
 
 -- UI
 function draw_ui()
@@ -372,6 +472,7 @@ function update_game()
     update_player()
     update_ufos()
     update_night()
+    update_grass_patches()
 end
 
 function draw_game()
@@ -676,9 +777,9 @@ __gfx__
 00700700700070007000700070007900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00077000087800060878000608785556000000060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000770004f4761164f4761164f479916700071167000700600000000000000000000000000000000000000000000000000000000000000000000000000000000
-00700700fff76666fff76666fff97966087866660575611600000000000000000000000030303030000000000000000000000000000000000000000000000000
-0000000000666ff600666ff600667ff64f476ff64f4766660000000000000000000000003b3b3b3b303030300000000000000000000000000000000000000000
-00000000006060060606006000600006f1f76006fff76ff60000000000000000000000003b3b3b3b3b3b3b3b3030303040404040000000000000000000000000
+00700700fff76666fff76666fff97966087866660575611600000000000000000000000030303030000000000000000040404040000000000000000000000000
+0000000000666ff600666ff600667ff64f476ff64f4766660000000000000000000000003b3b3b3b30303030000000004f4f4f4f404040400000000000000000
+00000000006060060606006000600006f1f76006fff76ff60000000000000000000000003b3b3b3b3b3b3b3b303030304f4f4f4f4f4f4f4f4040404000000000
 000000000000000000000000000000000000000000000000000000000000000000000000000000666600000000000000c0c00066000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000068282600000007766000c9cc682000000000000000000000000
 000b300000000000000000000000000000000000000000000000000000000000000000000000628282860000076666600c999cc2000000000000000000000000
@@ -728,7 +829,7 @@ e777777e7777777777777777777777777c1111111111111711111111000000000000000000000000
 00000000000ffffffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000ffffff0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
-0000000000000000000101010100000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000101010101010000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
