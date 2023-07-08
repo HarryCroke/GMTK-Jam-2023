@@ -2,9 +2,9 @@ pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
 function _init()
-    init_intro()
+    --init_intro()
     --init_game()
-    --init_menu()
+    init_menu()
     first_menu=true
     
 end
@@ -347,8 +347,8 @@ end
 function draw_ui()
     camera(0,0)
     -- clock
-    print("night " .. night.count , 8, 0, 7)
-    print("0" .. night.hour .. ":00", 108, 0, 7)
+    print("night " .. night.count , 0, 0, 7)
+    print("0" .. night.hour .. ":00AM", 100, 0, 7)
     
     --print("Gas: " .. player.gas, 8, 32, 7)
     
@@ -437,6 +437,43 @@ function draw_transition()
 
 end
 
+-- TUTORIAL
+function init_tutorial()
+    scene = "tutorial"
+    trans_tick = 0
+end
+
+function update_tutorial()
+    trans_tick += 1
+    if(trans_tick > 30) and btnp(4) or (trans_tick > 30) and btnp(5) then 
+        scene=("game")
+        init_game()
+    end
+end
+
+function draw_tutorial()
+    pal(8, 8, 1)
+    cls()
+    camera(0,0)
+    print("-night 1 brief-", hcenter("-night 1 brief-"), 8, 7)
+    print("time to reverse the roles", hcenter("time to reverse the roles"), 16, 7)
+    print("and abduct some aliens!", hcenter("and abduct some aliens!"), 24, 7)
+
+    print("drag down ufos with", hcenter("drag down ufos with"), 40, 7)
+    print("tractor beam - ⬆️/❎", hcenter("tractor beam - ⬆️⬆️⬆️/❎"), 48, 11)
+
+    print("refill tractor beam by", hcenter("refill tractor beam by"), 64, 7)
+    print("eating grass - ⬇️/🅾️", hcenter("eating grass - ⬇️⬇️⬇️/🅾️"), 72, 11)
+
+    print("abduct target ufos by 8AM", hcenter("abduct target ufos by 8AM"), 88, 8)
+
+    --print("-night " .. night.count+1 .. " breif-", hcenter("-night " .. night.count+1 .. " breif-"), 40, 7)
+    --print("abduct " .. night.goal+1 .. " ufos before 8AM", hcenter("abduct " .. night.goal+1 .. " ufos before 8AM"), 48, 7)
+    print("❎ to continue", hcenter("❎❎ to continue"), 104, 7)
+
+
+end
+
 -- GAME OVER
 function init_end()
     scene = "end"
@@ -485,7 +522,7 @@ function update_menu()
     end 
     if btnp(5) then
         music(-1) 
-        init_game()
+        init_tutorial()
         first_menu=false
     end
 end
@@ -590,6 +627,8 @@ function _update()
         update_end()
     elseif (scene == "menu") then 
         update_menu()
+    elseif (scene == "tutorial") then 
+        update_tutorial()
     end
     
 end
@@ -605,6 +644,8 @@ function _draw()
         draw_end()
     elseif (scene == "menu") then 
         draw_menu()
+    elseif (scene == "tutorial") then 
+        draw_tutorial()
     end
     
 end
