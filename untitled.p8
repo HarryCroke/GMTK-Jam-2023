@@ -254,7 +254,7 @@ function update_ufos()
             end
         end
 
-        if(ufo.x > player.cam_x-8) and (ufo.x + 8 > player.cam_x+128) or (ufo.x<0) or (ufo.x > map_end) then
+        if(ufo.x > player.cam_x) and (ufo.x > player.cam_x+128) or (ufo.x<0) or (ufo.x > map_end) then
             ufo.x+=ufo.dx/4
         else 
             ufo.x+=ufo.dx
@@ -323,7 +323,7 @@ function update_night()
     end
 
     if(player.score >= night.goal)then
-        if(night.count==1) then 
+        if(night.count==7) then 
             init_win() 
         else 
             init_transition(true)
