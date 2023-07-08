@@ -323,7 +323,11 @@ function update_night()
     end
 
     if(player.score >= night.goal)then
-        init_transition(true)
+        if(night.count==1) then 
+            init_win() 
+        else 
+            init_transition(true)
+        end
     end
 end
 
@@ -341,6 +345,7 @@ function new_night()
     else 
         night.ufo_perhour = 1
     end
+
     ufo_wave()
     init_player()
     get_grass_patches()
@@ -611,6 +616,41 @@ function draw_end()
     end 
 end
 
+-- VICTORY
+function init_win()
+    scene = "win"
+    sfx(-1)
+    sfx(16)
+win_tick = 0
+end
+
+function update_win()
+    win_tick+=1
+    if(win_tick > 240) and btnp(5) then
+        init_menu()
+    elseif (win_tick > 240) and btnp(4) then 
+        init_transition(true)
+    end
+end 
+
+function draw_win()
+    cls()
+    pal(8, 8+128, 1)
+    camera(0,0)
+    map(24,15)
+    spr(3, 116, 104)
+    print("it's over :)", hcenter("it's over :"), 55, 6)
+    print("it's over :)", hcenter("it's over :"), 54, 7)
+    if(win_tick > 200) then 
+        print("❎ return to menu", hcenter("❎❎ return to menu"), 69, 5)
+        print("❎ return to menu", hcenter("❎❎ return to menu"), 68, 7)
+
+        print("🅾️ endless", hcenter("🅾️🅾️ endless"), 77, 5)
+        print("🅾️ endless", hcenter("🅾️🅾️ endless"), 76, 7)
+        
+    end 
+end
+
 -- MAIN MENU    
 function init_menu()
     scene = "menu"
@@ -734,6 +774,8 @@ function _update()
         update_menu()
     elseif (scene == "tutorial") then 
         update_tutorial()
+    elseif (scene == "win") then 
+        update_win()
     end
     
 end
@@ -751,6 +793,8 @@ function _draw()
         draw_menu()
     elseif (scene == "tutorial") then 
         draw_tutorial()
+    elseif (scene == "win") then 
+        draw_win()
     end
     
 end
@@ -883,6 +927,7 @@ __sfx__
 010c00000212502125021250212502125021250212502125021250212502125021250212502125021250212500125001250012500125001250012500125001250212502125021250212502125021250212502125
 010c0000005730057313503135030c65500503005030e6000c6550050300503005030050314503145030e600005730057314503145030c65515503155030e6000c6551550315503155030057300500005000e600
 0d0c00000e5620e5620e5620e562005000050000500005000e5620e5620e5620e5620050000500005000050010562105621056210562115621156211562115621356213562135621356211562115621156211562
+011800000e1020e1521315215152141021d1521a102221522215222152221522215222152281021b0731b0731b073001020010200102001020010200102001020010200102001020010200102001020010200102
 __music__
 01 08424344
 00 09424344
