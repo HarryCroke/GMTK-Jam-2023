@@ -3,9 +3,9 @@ version 41
 __lua__
 function _init()
     patches = {}
-    init_intro()
+    --init_intro()
     --init_game()
-    --init_menu()
+    init_menu()
     first_menu=true
     
 end
@@ -28,6 +28,8 @@ function init_game()
         ufo_prev_dir = 1,
         goal = 0
     }
+    particles = {}
+    tractorparticles = {}
 
     map_start = 0
     map_end = 512
@@ -108,11 +110,17 @@ function update_player()
         player.sucking = true
         player.moving = false
         player.walk_dx = 0
+        ray_loc = 0
         if(player.flip) then
             shootRay(player.x+2, "suck")
+            ray_loc = player.x+2
+            --px, py, pcolour, psize, plifespan, plifernd, pdx, pdy, gravity
         else
             shootRay(player.x+5, "suck")
+            ray_loc = player.x+5
         end
+        spawn_tractor_particle()
+        
         player.suck_tick+=1
         if(player.suck_tick>=player.suck_max) then 
             sfx(17)
@@ -489,6 +497,7 @@ function update_game()
     update_ufos()
     update_night()
     update_grass_patches()
+    update_particles()
 end
 
 function draw_game()
@@ -499,9 +508,11 @@ function draw_game()
 
     pal(8, 8+128, 1)
     spr(player.spr, player.x, player.y, 1, 1, player.flip)
+    
     map(0,0)
+    draw_particles()
     for ray in all(rays) do 
-        line(ray.x, ray.top_y, ray.x, 103, 11)
+        --line(ray.x, ray.top_y, ray.x, 103, 11)
     end
     draw_ufos()
     --print(debug, 8, 40, 7)
@@ -827,7 +838,95 @@ function zspr(n,w,h,dx,dy,dz)
     dh = sh * dz
     sspr(sx,sy,sw,sh, dx,dy,dw,dh)
   
-  end
+end
+
+-- particles
+function create_partcile(px, py, pcolour, psize, plifespan, plifernd, pdx, pdy, gravity, pkilly, psizey, ptbl)
+    nlifespan = plifespan - rnd(plifernd)
+    particle = {
+        x = px,
+        y= py,
+        colour = pcolour,
+        size = psize,
+        life = nlifespan,
+        dx = pdx,
+        dy = pdy,
+        gravity = pgravity,
+        killy = pkilly,
+        sizey = psizey
+    }
+    if(ptbl == "tractorparticles") then 
+        add(tractorparticles, particle)
+    else 
+        add(particles, particle)
+    end
+end
+
+function update_particles()
+    for p in all(particles) do 
+        p.x += p.dx 
+        p.y += p.dy 
+        if(p.gravity) then 
+            p.dy += 0.1
+        end
+
+        p.life -= 1
+        if(p.life<=1) or (p.y>=p.killy) then 
+            del(particles, p)
+        end
+
+    end
+
+    for p in all(tractorparticles) do 
+        p.x += p.dx 
+        p.y += p.dy 
+        if(p.gravity) then 
+            p.dy += 0.1
+        end
+
+        if not (player.sucking) then
+        p.life -= 1
+        end
+        if(p.life<=1) or (p.y>=p.killy) then 
+            del(tractorparticles, p)
+        end
+
+    end
+end
+
+function draw_particles()
+    for p in all(particles) do 
+        rectfill(p.x, p.y, p.x + (p.size-1), p.y + (p.sizey-1), p.colour)
+    end
+    for p in all(tractorparticles) do 
+        rectfill(p.x, p.y, p.x + (p.size-1), p.y + (p.sizey-1), p.colour)
+    end
+end
+
+function spawn_tractor_particle()
+    -- px, py, pcolour, psize, plifespan, plifernd, pdx, pdy, gravity, pkilly
+    spawn_x = ray_loc + (rnd(32)-16)
+    spawn_y = rnd(40)
+    type = rnd(4)
+    if (type > 2) then 
+        colour = 3
+        size = 1
+    else 
+        colour = 11
+        size = 1
+    end
+
+    tt = 30
+    dist_x = (-1*(spawn_x - ray_loc)) - (size-1)
+    dist_y = abs(spawn_y - 103)
+
+    dx = dist_x/tt 
+    dy = dist_y/tt
+
+    create_partcile(spawn_x, spawn_y, colour, size, 15, 15, dx, dy, false, 103, 2, "tractorparticles")
+end
+
+
 __gfx__
 00000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000005550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
