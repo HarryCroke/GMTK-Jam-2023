@@ -720,7 +720,7 @@ function update_menu()
     if(menu_tick>40) then 
         menu_tick=0
     end 
-    if btnp(5) then
+    if btnp(4) then
         music(-1) 
         init_tutorial()
         first_menu=false
@@ -739,19 +739,19 @@ function draw_menu()
     map(64,0)
     
     if(menu_tick<20) then 
-        print("❎ to start", hcenter("❎❎ to start"), 97, 14)
-        print("❎ to start", hcenter("❎❎ to start"), 96, 7)
+        print("🅾️ to start", hcenter("🅾️🅾️ to start"), 97, 14)
+        print("🅾️ to start", hcenter("🅾️🅾️ to start"), 96, 7)
     else 
-        print("❎ to start", hcenter("❎❎ to start"), 97, 13)
-        print("❎ to start", hcenter("❎❎ to start"), 96, 6)
+        print("🅾️ to start", hcenter("🅾️🅾️ to start"), 97, 13)
+        print("🅾️ to start", hcenter("🅾️🅾️ to start"), 96, 6)
     end
     
 
-    print("⬆️/❎ - tractor beam", hcenter("⬆️⬆️/🅾️🅾️ - tractor beam"), 113, 2)
-    print("⬆️/❎ - tractor beam", hcenter("⬆️⬆️/🅾️🅾️ - tractor beam"), 112, 7)
+    print("❎ = x", hcenter("❎❎ = x"), 113, 2)
+    print("❎ = x", hcenter("❎❎ = x"), 112, 7)
 
-    print("⬇️/🅾️ - eat grass", hcenter("⬆️⬆️/🅾️🅾️ - eat grass"), 121, 2)
-    print("⬇️/🅾️ - eat grass", hcenter("⬆️⬆️/🅾️🅾️ - eat grass"), 120, 7)
+    print("🅾️ = z", hcenter("🅾️🅾️ = z"), 121, 2)
+    print("🅾️ = z", hcenter("🅾️🅾️ = z"), 120, 7)
 
     print("HARFROG 2023 GMTK JAM", 2, 2, 7)
     --print("2023 GMTK JAM", 2, 10, 7)
