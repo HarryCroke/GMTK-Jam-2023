@@ -7,6 +7,8 @@ function _init()
     --init_game()
     --init_menu()
     first_menu=true
+    completed = false 
+    hiscore = 0
     
 end
 
@@ -20,6 +22,7 @@ function init_game()
         count = 0,
         hour = 0,
         tick = 0,
+        total_tick = 0,
         hour_length = 300,
         --hour_length = 1,
         ufo_count = 0,
@@ -356,6 +359,7 @@ end
 -- NIGHT
 function update_night()
     night.tick+=1
+    night.total_tick += 1
     if(night.tick>night.hour_length) then
         night.hour+=1
         night.tick=0
@@ -394,6 +398,12 @@ function new_night()
     night.ufo_count = night.ufo_total
     night.goal = night.count
     player.score = 0
+    night.total_tick = 0
+
+    particles = {}
+    tractorparticles = {}
+    bubbles = {}
+
     if (night.count>6) then
         night.ufo_perhour = 2
     else 
@@ -408,6 +418,9 @@ function new_night()
     init_player()
     get_grass_patches()
 
+    if(night.count > hiscore) then 
+        hiscore = night.count
+    end 
 end
 
 -- GRASS
@@ -545,23 +558,25 @@ end
 
 function draw_game()
     cls()
-    camera(player.cam_x, 120)
-    map(0,0)
-    camera(player.cam_x, 0)
+    if(night.total_tick > 1) then 
+        camera(player.cam_x, 120)
+        map(0,0)
+        camera(player.cam_x, 0)
 
-    pal(8, 8+128, 1)
-    spr(player.spr, player.x, player.y, 1, 1, player.flip)
-    
-    map(0,0)
-    draw_particles()
-    for ray in all(rays) do 
-        --line(ray.x, ray.top_y, ray.x, 103, 11)
-    end
-    draw_ufos()
-    draw_bubbles()
-    --print(debug, 8, 40, 7)
+        pal(8, 8+128, 1)
+        spr(player.spr, player.x, player.y, 1, 1, player.flip)
+        
+        map(0,0)
+        draw_particles()
+        for ray in all(rays) do 
+            --line(ray.x, ray.top_y, ray.x, 103, 11)
+        end
+        draw_ufos()
+        draw_bubbles()
+        --print(debug, 8, 40, 7)
 
-    draw_ui()
+        draw_ui()
+    end 
 end
 
 -- NIGHT TRANSITIONS
@@ -661,7 +676,8 @@ function init_end()
     scene = "end"
     sfx(-1)
     sfx(6)
-end_tick = 0
+    end_tick = 0
+    completed = true
 end
 
 function update_end()
@@ -693,7 +709,8 @@ function init_win()
     scene = "win"
     sfx(-1)
     sfx(16)
-win_tick = 0
+    win_tick = 0
+    completed = true
 end
 
 function update_win()
@@ -763,6 +780,11 @@ function draw_menu()
         print("🅾️ to start", hcenter("🅾️🅾️ to start"), 96, 6)
     end
     
+    -- HISCORE
+    if(completed) then 
+        print("hi-score: " .. hiscore, hcenter("hi-score: " .. hiscore), 81, 14)
+        print("hi-score: " .. hiscore, hcenter("hi-score: " .. hiscore), 80, 7)
+    end 
 
     print("❎ = x", hcenter("❎❎ = x"), 113, 2)
     print("❎ = x", hcenter("❎❎ = x"), 112, 7)
