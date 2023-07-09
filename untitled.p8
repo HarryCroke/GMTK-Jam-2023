@@ -7,8 +7,10 @@ function _init()
     --init_game()
     --init_menu()
     first_menu=true
-    completed = false 
+    completed = false  
     hiscore = 0
+
+    menuitem(1, "return to menu", init_menu)
     
 end
 
@@ -421,6 +423,7 @@ function new_night()
     if(night.count > hiscore) then 
         hiscore = night.count
     end 
+    menuitem(2, "skip night", skip_night)
 end
 
 -- GRASS
@@ -591,6 +594,8 @@ function init_transition(night_success)
         sfx(-1)
         sfx(5)
     end
+
+    menuitem(2)
 end
 
 function update_transition()
@@ -637,6 +642,7 @@ function init_tutorial()
     scene = "tutorial"
     trans_tick = 0
     sfx(4)
+    menuitem(2)
 end
 
 function update_tutorial()
@@ -678,6 +684,7 @@ function init_end()
     sfx(6)
     end_tick = 0
     completed = true
+    menuitem(2)
 end
 
 function update_end()
@@ -711,6 +718,7 @@ function init_win()
     sfx(16)
     win_tick = 0
     completed = true
+    menuitem(2)
 end
 
 function update_win()
@@ -747,6 +755,7 @@ function init_menu()
     if(first_menu == false) then
         music(4)
     end
+    menuitem(2)
 end
 
 function update_menu()
@@ -1033,6 +1042,14 @@ function draw_bubbles()
     end 
 end 
 
+function skip_night()
+    strikes-=1
+    if(strikes >= 0) then 
+        init_transition(false)
+    else 
+        init_end()
+    end 
+end 
 
 __gfx__
 00000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
