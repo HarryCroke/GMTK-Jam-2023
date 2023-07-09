@@ -397,6 +397,10 @@ function new_night()
         night.ufo_perhour = 1
     end
 
+    if (night.count==7) then
+        strikes = 0
+    end
+
     ufo_wave()
     init_player()
     get_grass_patches()
@@ -590,12 +594,20 @@ function draw_transition()
         print(player.score .. "/" .. night.goal .. " ufos abducted", hcenter(player.score .. "/" .. night.goal .. " ufos abducted"), 24, 7)
     end 
 
-    print("-night " .. night.count+1 .. " brief-", hcenter("-night " .. night.count+1 .. " brief-"), 40, 7)
-    print("abduct " .. night.goal+1 .. " ufos before 8AM", hcenter("abduct " .. night.goal+1 .. " ufos before 8AM"), 48, 7)
-    print("🅾️ to continue", hcenter("🅾️ to continue"), 80, 7)
-
-    if(strikes == 0) then 
-        print("you cannot fail again!", hcenter("you cannot fail again!"), 56, 8)
+    if (night.count + 1 != 7) then 
+        print("-night " .. night.count+1 .. " brief-", hcenter("-night " .. night.count+1 .. " brief-"), 40, 7)
+        print("abduct " .. night.goal+1 .. " ufos before 8AM", hcenter("abduct " .. night.goal+1 .. " ufos before 8AM"), 48, 7)
+        print("🅾️ to continue", hcenter("🅾️ to continue"), 80, 7)
+        if(strikes == 0) and (night.count + 1 <= 7 ) then 
+            print("you cannot fail again!", hcenter("you cannot fail again!"), 56, 8)
+        elseif (strikes == 0) then 
+            print("you cannot fail!", hcenter("you cannot fail!"), 56, 8)
+        end 
+    else 
+        print("-final night brief-", hcenter("-final night brief-"), 40, 8)
+        print("abduct " .. night.goal+1 .. " ufos before 8AM", hcenter("abduct " .. night.goal+1 .. " ufos before 8AM"), 48, 7)
+        print("🅾️ to continue", hcenter("🅾️ to continue"), 80, 7)
+        print("you cannot fail this night!", hcenter("you cannot fail this night!"), 56, 8)
     end 
 
 end
