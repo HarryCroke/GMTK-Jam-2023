@@ -30,6 +30,7 @@ function init_game()
     }
     particles = {}
     tractorparticles = {}
+    bubbles = {}
 
     map_start = 0
     map_end = 512
@@ -279,6 +280,8 @@ function update_ufos()
         if(ufo.y >= player.y) then
             del(ufos, ufo)
             player.score += 1
+            --ptext, px, py, pdy, plifespan
+            create_textbubble("ALIEN ABDUCTED!", player.x+4, player.y-2, -0.5, 30)
             sfx(7)
         end
 
@@ -537,6 +540,7 @@ function update_game()
     update_night()
     update_grass_patches()
     update_particles()
+    update_bubbles()
 end
 
 function draw_game()
@@ -554,6 +558,7 @@ function draw_game()
         --line(ray.x, ray.top_y, ray.x, 103, 11)
     end
     draw_ufos()
+    draw_bubbles()
     --print(debug, 8, 40, 7)
 
     draw_ui()
@@ -975,6 +980,36 @@ function spawn_tractor_particle()
 
     create_partcile(spawn_x, spawn_y, colour, size, 15, 15, dx, dy, false, 103, 2, "tractorparticles")
 end
+
+function create_textbubble(ptext, px, py, pdy, plifespan)
+    bubble = {
+        x = px-#ptext*2,
+        y= py,
+        text = ptext,
+        dy = pdy,
+        life = plifespan
+    }
+
+    add(bubbles, bubble)
+end 
+
+function update_bubbles()
+    for bubble in all(bubbles) do 
+        bubble.y += bubble.dy
+        bubble.life -= 1
+
+        if(bubble.life <= 0) then 
+            del(bubbles, bubble)
+        end 
+    end 
+end
+
+function draw_bubbles()
+    for bubble in all(bubbles) do 
+        print(bubble.text, bubble.x, bubble.y+1, 5)
+        print(bubble.text, bubble.x, bubble.y, 7)
+    end 
+end 
 
 
 __gfx__
